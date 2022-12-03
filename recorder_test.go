@@ -38,7 +38,7 @@ func TestRecorder_simpleKeyStrokes(t *testing.T) {
 			keyDown(time.UnixMilli(30), "w"),
 			keyUp(time.UnixMilli(35), "w"),
 		}},
-		recorder.recordedMacros,
+		recorder.RecordedMacros,
 	)
 }
 
@@ -59,10 +59,10 @@ func runRecorder(recorder *Recorder) {
 }
 
 func awaitToggle(recorder *Recorder) {
-	initialRecording := recorder.isRecording
+	initialRecording := recorder.IsRecording
 	recorder.Toggle()
 
-	for recorder.isRecording == initialRecording {
-		// Loop until "isRecording" has changed.
+	for recorder.IsRecording == initialRecording {
+		// Loop until "IsRecording" has changed.
 	}
 }

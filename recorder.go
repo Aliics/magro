@@ -5,14 +5,14 @@ import (
 )
 
 type Recorder struct {
-	isRecording bool
+	IsRecording    bool
+	RecordedMacros [][]hook.Event
 
 	recordCh    chan bool
 	eventCh     chan hook.Event
 	processedCh chan hook.Event
 
-	recordedMacros [][]hook.Event
-	currentEvents  []hook.Event
+	currentEvents []hook.Event
 }
 
 func NewRecorder(eventCh chan hook.Event) *Recorder {
@@ -23,13 +23,12 @@ func NewRecorder(eventCh chan hook.Event) *Recorder {
 	}
 }
 
-func (r *Recorder) Close() error {
+func (r *Recorder) Close() {
 	close(r.recordCh)
-	return nil
 }
 
 func (r *Recorder) Toggle() {
-	r.recordCh <- !r.isRecording
+	r.recordCh <- !r.IsRecording
 }
 
 func (r *Recorder) Start() <-chan hook.Event {
@@ -38,14 +37,14 @@ func (r *Recorder) Start() <-chan hook.Event {
 			select {
 			case nowRecording := <-r.recordCh:
 				if !nowRecording {
-					r.recordedMacros = append(r.recordedMacros, r.currentEvents)
+					r.RecordedMacros = append(r.RecordedMacros, r.currentEvents)
 					r.currentEvents = nil
 				}
 
 				// Reflect the recording state here.
-				r.isRecording = !r.isRecording
+				r.IsRecording = !r.IsRecording
 			case event := <-r.eventCh:
-				if r.isRecording {
+				if r.IsRecording {
 					r.currentEvents = append(r.currentEvents, event)
 				}
 
