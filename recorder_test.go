@@ -28,7 +28,7 @@ func TestRecorder_simpleKeyStrokes(t *testing.T) {
 
 	assert.Equal(
 		t,
-		[][]hook.Event{{
+		[]Macro{{
 			keyDown(time.UnixMilli(0), "a"),
 			keyUp(time.UnixMilli(5), "a"),
 			keyDown(time.UnixMilli(10), "s"),
