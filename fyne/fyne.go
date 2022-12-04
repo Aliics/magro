@@ -10,10 +10,41 @@ import (
 	"magro"
 )
 
-func CreateWindow(recorder *magro.Recorder) fyne.Window {
+func CreateWindow(recorder *magro.Recorder) (fyne.Window, func()) {
 	window := app.New().NewWindow("magro")
 
-	macroList := widget.NewList(
+	macroList := createMacroList(recorder)
+
+	recordButton := widget.NewButton("Record (ctrl + alt + r)", func() {
+		recorder.Toggle()
+	})
+
+	refreshContent := func() {
+		if recorder.IsRecording {
+			recordButton.SetText("Stop (ctrl + alt + r)")
+		} else {
+			recordButton.SetText("Record (ctrl + alt + r)")
+		}
+
+		window.Content().Refresh()
+	}
+
+	window.SetContent(
+		container.NewBorder(
+			container.NewVBox(
+				recordButton,
+				widget.NewSeparator(),
+			),
+			nil, nil, nil,
+			macroList,
+		),
+	)
+
+	return window, refreshContent
+}
+
+func createMacroList(recorder *magro.Recorder) *widget.List {
+	return widget.NewList(
 		func() int {
 			return len(recorder.RecordedMacros)
 		},
@@ -28,30 +59,6 @@ func CreateWindow(recorder *magro.Recorder) fyne.Window {
 			}
 		},
 	)
-
-	var recordButton *widget.Button
-	recordButton = widget.NewButton("Record (ctrl + alt + r)", func() {
-		recorder.Toggle()
-
-		if recorder.IsRecording {
-			recordButton.SetText("Record (ctrl + alt + r)")
-		} else {
-			recordButton.SetText("Stop (ctrl + alt + r)")
-		}
-	})
-
-	window.SetContent(
-		container.NewBorder(
-			container.NewVBox(
-				recordButton,
-				widget.NewSeparator(),
-			),
-			nil, nil, nil,
-			macroList,
-		),
-	)
-
-	return window
 }
 
 func playMacro(macro magro.Macro) {

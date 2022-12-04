@@ -12,8 +12,19 @@ func main() {
 	recorder := createRecorder()
 	defer recorder.Close()
 
-	window := fyne.CreateWindow(recorder)
+	window, refresh := fyne.CreateWindow(recorder)
 	defer window.Close()
+
+	go func() {
+		// Refresh the window if recording state changes.
+
+		knownRecording := recorder.IsRecording
+		for {
+			if recorder.IsRecording != knownRecording {
+				refresh()
+			}
+		}
+	}()
 
 	go func() {
 		<-hook.Process(recorder.Start())
