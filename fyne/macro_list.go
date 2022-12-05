@@ -1,7 +1,6 @@
 package fyne
 
 import (
-	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
@@ -22,17 +21,19 @@ func createMacroList(recorder *magro.Recorder) *widget.List {
 			)
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
+			macro := recorder.RecordedMacros[id]
 			macroItem := object.(*fyne.Container)
 
 			label := macroItem.Objects[0].(*macroLabel)
-			label.SetText(fmt.Sprintf("Macro %d", id))
+			label.SetText(macro.Name)
 			label.onDoubleTapped = func() {
-				log.Printf("opening macro %d", id)
+				log.Printf("opening macro: %s", macro.Name)
+				contentSwitchCh <- contentSwitch{kind: contentSwitchKindMacro, macroIndex: id}
 			}
 
 			playButton := macroItem.Objects[1].(*widget.Button)
 			playButton.OnTapped = func() {
-				go playMacro(recorder.RecordedMacros[id])
+				go playMacro(macro)
 			}
 		},
 	)

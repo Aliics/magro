@@ -28,16 +28,21 @@ func TestRecorder_simpleKeyStrokes(t *testing.T) {
 
 	assert.Equal(
 		t,
-		[]Macro{{
-			Event{0 * time.Microsecond, KeyKindDown, 'a'},
-			Event{6 * time.Microsecond, KeyKindUp, 'a'},
-			Event{6 * time.Microsecond, KeyKindDown, 's'},
-			Event{2 * time.Microsecond, KeyKindUp, 's'},
-			Event{8 * time.Microsecond, KeyKindDown, 'd'},
-			Event{1 * time.Microsecond, KeyKindUp, 'd'},
-			Event{1 * time.Microsecond, KeyKindDown, 'w'},
-			Event{7 * time.Microsecond, KeyKindUp, 'w'},
-		}},
+		[]Macro{
+			{
+				Name: "new macro",
+				Events: []Event{
+					{0 * time.Microsecond, KeyKindDown, 'a'},
+					{6 * time.Microsecond, KeyKindUp, 'a'},
+					{6 * time.Microsecond, KeyKindDown, 's'},
+					{2 * time.Microsecond, KeyKindUp, 's'},
+					{8 * time.Microsecond, KeyKindDown, 'd'},
+					{1 * time.Microsecond, KeyKindUp, 'd'},
+					{1 * time.Microsecond, KeyKindDown, 'w'},
+					{7 * time.Microsecond, KeyKindUp, 'w'},
+				},
+			},
+		},
 		recorder.RecordedMacros,
 	)
 }

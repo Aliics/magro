@@ -35,12 +35,19 @@ func (e Event) String() string {
 	return fmt.Sprintf("Event{Delta: %s, KeyKind: %s, Keycode: %c}", e.Delta, e.KeyKind, e.Keycode)
 }
 
-type Macro []Event
+type Macro struct {
+	Name   string
+	Events []Event
+}
+
+func NewMacro() *Macro {
+	return &Macro{Name: "new macro"}
+}
 
 func (m Macro) PlayEvents() error {
-	log.Printf("playing %d macro events", len(m))
+	log.Printf("playing %d macro events", len(m.Events))
 
-	for _, event := range m {
+	for _, event := range m.Events {
 		time.Sleep(event.Delta)
 
 		if event.Keycode != 0 {

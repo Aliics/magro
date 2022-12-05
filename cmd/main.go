@@ -12,7 +12,7 @@ func main() {
 	recorder := createRecorder()
 	defer recorder.Close()
 
-	window, refresh := fyne.CreateWindow(recorder)
+	window, refresh := fyne.CreateMainWindow(recorder)
 	defer window.Close()
 
 	go func() {

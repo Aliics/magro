@@ -11,34 +11,37 @@ import (
 
 const windowTitle = "magro"
 
-func CreateWindow(recorder *magro.Recorder) (fyne.Window, func()) {
-	window := app.New().NewWindow(windowTitle)
+func CreateMainWindow(recorder *magro.Recorder) (window fyne.Window, refreshMacroList func()) {
+	window = app.New().NewWindow(windowTitle)
+	window.Resize(fyne.NewSize(240, 360))
 
+	// Main content.
 	recordButton := createRecordButton(recorder)
-
 	macroList := createMacroList(recorder)
-
-	window.SetContent(
-		container.NewBorder(
-			container.NewVBox(
-				recordButton,
-				widget.NewSeparator(),
-			),
-			nil, nil, nil,
-			macroList,
+	mainContent := container.NewBorder(
+		container.NewVBox(
+			recordButton,
+			widget.NewSeparator(),
 		),
+		nil, nil, nil,
+		macroList,
 	)
 
-	refreshContent := func() {
+	go handleContentSwitch(recorder, window, mainContent)
+
+	// Show the main content.
+	contentSwitchCh <- contentSwitch{kind: contentSwitchKindMain}
+
+	refreshMacroList = func() {
 		setRecordButtonActive(recordButton, recorder.IsRecording)
 
 		window.Content().Refresh()
 	}
 
-	return window, refreshContent
+	return window, refreshMacroList
 }
 
-func playMacro(macro magro.Macro) {
+func playMacro(macro *magro.Macro) {
 	err := macro.PlayEvents()
 	if err != nil {
 		log.Fatalln(err)
