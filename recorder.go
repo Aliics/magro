@@ -2,6 +2,7 @@ package magro
 
 import (
 	hook "github.com/robotn/gohook"
+	"time"
 )
 
 type Recorder struct {
@@ -12,7 +13,8 @@ type Recorder struct {
 	eventCh     chan hook.Event
 	processedCh chan hook.Event
 
-	currentMacro Macro
+	previousEventTime *time.Time
+	currentMacro      Macro
 }
 
 func NewRecorder(eventCh chan hook.Event) *Recorder {
@@ -39,13 +41,17 @@ func (r *Recorder) Start() <-chan hook.Event {
 				if !nowRecording {
 					r.RecordedMacros = append(r.RecordedMacros, r.currentMacro)
 					r.currentMacro = nil
+					r.previousEventTime = nil
+				} else {
+					now := time.Now()
+					r.previousEventTime = &now
 				}
 
 				// Reflect the recording state here.
 				r.IsRecording = !r.IsRecording
 			case event := <-r.eventCh:
-				if r.IsRecording {
-					r.currentMacro = append(r.currentMacro, event)
+				if r.IsRecording && event.Rawcode != 0 {
+					r.addEventToMacroRecording(event)
 				}
 
 				r.processedCh <- event
@@ -54,4 +60,21 @@ func (r *Recorder) Start() <-chan hook.Event {
 	}()
 
 	return r.processedCh
+}
+
+func (r *Recorder) addEventToMacroRecording(event hook.Event) {
+	var delta time.Duration
+	if r.previousEventTime != nil {
+		delta = event.When.Sub(*r.previousEventTime)
+	}
+
+	var keyKind KeyKind
+	if event.Kind == hook.KeyDown {
+		keyKind = KeyKindDown
+	} else {
+		keyKind = KeyKindUp
+	}
+
+	r.currentMacro = append(r.currentMacro, Event{delta, keyKind, rune(event.Rawcode)})
+	r.previousEventTime = &event.When
 }

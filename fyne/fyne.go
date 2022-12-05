@@ -13,21 +13,18 @@ import (
 func CreateWindow(recorder *magro.Recorder) (fyne.Window, func()) {
 	window := app.New().NewWindow("magro")
 
-	macroList := createMacroList(recorder)
-
 	recordButton := widget.NewButton("Record (ctrl + alt + r)", func() {
 		recorder.Toggle()
 	})
+	setRecordButtonActive(recordButton, false)
 
 	refreshContent := func() {
-		if recorder.IsRecording {
-			recordButton.SetText("Stop (ctrl + alt + r)")
-		} else {
-			recordButton.SetText("Record (ctrl + alt + r)")
-		}
+		setRecordButtonActive(recordButton, recorder.IsRecording)
 
 		window.Content().Refresh()
 	}
+
+	macroList := createMacroList(recorder)
 
 	window.SetContent(
 		container.NewBorder(
@@ -43,17 +40,35 @@ func CreateWindow(recorder *magro.Recorder) (fyne.Window, func()) {
 	return window, refreshContent
 }
 
+func setRecordButtonActive(button *widget.Button, active bool) {
+	if active {
+		button.SetText("Stop (ctrl + alt + r)")
+		button.Importance = widget.HighImportance
+	} else {
+		button.SetText("Record (ctrl + alt + r)")
+		button.Importance = widget.MediumImportance
+	}
+}
+
 func createMacroList(recorder *magro.Recorder) *widget.List {
 	return widget.NewList(
 		func() int {
 			return len(recorder.RecordedMacros)
 		},
 		func() fyne.CanvasObject {
-			return widget.NewButton("template", nil)
+			return container.NewBorder(
+				nil, nil,
+				widget.NewLabel(""),
+				widget.NewButton("Play", nil),
+			)
 		},
 		func(id widget.ListItemID, object fyne.CanvasObject) {
-			button := object.(*widget.Button)
-			button.SetText(fmt.Sprintf("Macro %d", id))
+			macroItem := object.(*fyne.Container)
+
+			label := macroItem.Objects[0].(*widget.Label)
+			label.SetText(fmt.Sprintf("Macro %d", id))
+
+			button := macroItem.Objects[1].(*widget.Button)
 			button.OnTapped = func() {
 				go playMacro(recorder.RecordedMacros[id])
 			}

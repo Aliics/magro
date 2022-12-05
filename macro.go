@@ -3,37 +3,61 @@ package magro
 import (
 	"fmt"
 	"github.com/go-vgo/robotgo"
-	hook "github.com/robotn/gohook"
 	"log"
 	"time"
 )
 
-type Macro []hook.Event
+type KeyKind uint8
+
+func (k KeyKind) String() string {
+	switch k {
+	case KeyKindDown:
+		return "Down"
+	case KeyKindUp:
+		return "Up"
+	default:
+		panic("unknown KeyKind")
+	}
+}
+
+const (
+	KeyKindDown KeyKind = iota
+	KeyKindUp
+)
+
+type Event struct {
+	Delta   time.Duration
+	KeyKind KeyKind
+	Keycode rune
+}
+
+func (e Event) String() string {
+	return fmt.Sprintf("Event{Delta: %s, KeyKind: %s, Keycode: %c}", e.Delta, e.KeyKind, e.Keycode)
+}
+
+type Macro []Event
 
 func (m Macro) PlayEvents() error {
-	log.Printf("playing %d m from %s", len(m), m[0].When)
+	log.Printf("playing %d macro events", len(m))
 
-	previousWhen := m[0].When
 	for _, event := range m {
-		time.Sleep(event.When.Sub(previousWhen))
+		time.Sleep(event.Delta)
 
-		if event.Rawcode != 0 {
+		if event.Keycode != 0 {
 			fmt.Printf("kb event: %s\n", event)
 
-			if event.Kind == hook.KeyDown {
-				err := robotgo.KeyDown(string(rune(event.Rawcode)))
+			if event.KeyKind == KeyKindDown {
+				err := robotgo.KeyDown(string(event.Keycode))
 				if err != nil {
 					return err
 				}
-			} else if event.Kind == hook.KeyUp {
-				err := robotgo.KeyUp(string(rune(event.Rawcode)))
+			} else if event.KeyKind == KeyKindUp {
+				err := robotgo.KeyUp(string(event.Keycode))
 				if err != nil {
 					return err
 				}
 			}
 		}
-
-		previousWhen = event.When
 	}
 
 	return nil

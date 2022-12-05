@@ -21,6 +21,7 @@ func main() {
 		knownRecording := recorder.IsRecording
 		for {
 			if recorder.IsRecording != knownRecording {
+				knownRecording = recorder.IsRecording
 				refresh()
 			}
 		}

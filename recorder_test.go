@@ -3,7 +3,6 @@ package magro
 import (
 	hook "github.com/robotn/gohook"
 	"github.com/stretchr/testify/assert"
-	"github.com/vcaesar/keycode"
 	"testing"
 	"time"
 )
@@ -15,39 +14,40 @@ func TestRecorder_simpleKeyStrokes(t *testing.T) {
 
 	awaitToggle(recorder)
 
-	recorder.eventCh <- keyDown(time.UnixMilli(0), "a")
-	recorder.eventCh <- keyUp(time.UnixMilli(5), "a")
-	recorder.eventCh <- keyDown(time.UnixMilli(10), "s")
-	recorder.eventCh <- keyUp(time.UnixMilli(15), "s")
-	recorder.eventCh <- keyDown(time.UnixMilli(20), "d")
-	recorder.eventCh <- keyUp(time.UnixMilli(25), "d")
-	recorder.eventCh <- keyDown(time.UnixMilli(30), "w")
-	recorder.eventCh <- keyUp(time.UnixMilli(35), "w")
+	now := *recorder.previousEventTime
+	recorder.eventCh <- keyDown(now, 'a')
+	recorder.eventCh <- keyUp(now.Add(6*time.Microsecond), 'a')
+	recorder.eventCh <- keyDown(now.Add(12*time.Microsecond), 's')
+	recorder.eventCh <- keyUp(now.Add(14*time.Microsecond), 's')
+	recorder.eventCh <- keyDown(now.Add(22*time.Microsecond), 'd')
+	recorder.eventCh <- keyUp(now.Add(23*time.Microsecond), 'd')
+	recorder.eventCh <- keyDown(now.Add(24*time.Microsecond), 'w')
+	recorder.eventCh <- keyUp(now.Add(31*time.Microsecond), 'w')
 
 	awaitToggle(recorder)
 
 	assert.Equal(
 		t,
 		[]Macro{{
-			keyDown(time.UnixMilli(0), "a"),
-			keyUp(time.UnixMilli(5), "a"),
-			keyDown(time.UnixMilli(10), "s"),
-			keyUp(time.UnixMilli(15), "s"),
-			keyDown(time.UnixMilli(20), "d"),
-			keyUp(time.UnixMilli(25), "d"),
-			keyDown(time.UnixMilli(30), "w"),
-			keyUp(time.UnixMilli(35), "w"),
+			Event{0 * time.Microsecond, KeyKindDown, 'a'},
+			Event{6 * time.Microsecond, KeyKindUp, 'a'},
+			Event{6 * time.Microsecond, KeyKindDown, 's'},
+			Event{2 * time.Microsecond, KeyKindUp, 's'},
+			Event{8 * time.Microsecond, KeyKindDown, 'd'},
+			Event{1 * time.Microsecond, KeyKindUp, 'd'},
+			Event{1 * time.Microsecond, KeyKindDown, 'w'},
+			Event{7 * time.Microsecond, KeyKindUp, 'w'},
 		}},
 		recorder.RecordedMacros,
 	)
 }
 
-func keyDown(when time.Time, keyString string) hook.Event {
-	return hook.Event{When: when, Keycode: keycode.Keycode[keyString], Direction: hook.KeyDown}
+func keyDown(when time.Time, r rune) hook.Event {
+	return hook.Event{When: when, Rawcode: uint16(r), Kind: hook.KeyDown}
 }
 
-func keyUp(when time.Time, keyString string) hook.Event {
-	return hook.Event{When: when, Keycode: keycode.Keycode[keyString], Direction: hook.KeyUp}
+func keyUp(when time.Time, r rune) hook.Event {
+	return hook.Event{When: when, Rawcode: uint16(r), Kind: hook.KeyUp}
 }
 
 func runRecorder(recorder *Recorder) {
