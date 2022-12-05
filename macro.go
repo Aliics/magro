@@ -44,7 +44,7 @@ func (m Macro) PlayEvents() error {
 		time.Sleep(event.Delta)
 
 		if event.Keycode != 0 {
-			fmt.Printf("kb event: %s\n", event)
+			log.Printf("kb event: %s\n", event)
 
 			if event.KeyKind == KeyKindDown {
 				err := robotgo.KeyDown(string(event.Keycode))

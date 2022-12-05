@@ -2,6 +2,7 @@ package magro
 
 import (
 	hook "github.com/robotn/gohook"
+	"log"
 	"time"
 )
 
@@ -43,6 +44,7 @@ func (r *Recorder) Start() <-chan hook.Event {
 					r.currentMacro = nil
 					r.previousEventTime = nil
 				} else {
+					log.Println("macro recording started")
 					now := time.Now()
 					r.previousEventTime = &now
 				}
@@ -75,6 +77,9 @@ func (r *Recorder) addEventToMacroRecording(event hook.Event) {
 		keyKind = KeyKindUp
 	}
 
-	r.currentMacro = append(r.currentMacro, Event{delta, keyKind, rune(event.Rawcode)})
+	macroEvent := Event{delta, keyKind, rune(event.Rawcode)}
+	r.currentMacro = append(r.currentMacro, macroEvent)
 	r.previousEventTime = &event.When
+
+	log.Printf("recorded event %s", macroEvent)
 }
