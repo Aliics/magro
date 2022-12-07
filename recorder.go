@@ -35,6 +35,15 @@ func (r *Recorder) Toggle() {
 	r.recordCh <- !r.IsRecording
 }
 
+func (r *Recorder) ToggleBlocking() {
+	initialRecording := r.IsRecording
+	r.Toggle()
+
+	for r.IsRecording == initialRecording {
+		// Loop until "IsRecording" has changed.
+	}
+}
+
 func (r *Recorder) Start() <-chan hook.Event {
 	go func() {
 		for {

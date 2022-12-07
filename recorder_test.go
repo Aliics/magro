@@ -12,7 +12,7 @@ func TestRecorder_simpleKeyStrokes(t *testing.T) {
 	recorder := NewRecorder(eventCh)
 	runRecorder(recorder)
 
-	awaitToggle(recorder)
+	recorder.ToggleBlocking()
 
 	now := *recorder.previousEventTime
 	recorder.eventCh <- keyDown(now, 'a')
@@ -24,7 +24,7 @@ func TestRecorder_simpleKeyStrokes(t *testing.T) {
 	recorder.eventCh <- keyDown(now.Add(24*time.Microsecond), 'w')
 	recorder.eventCh <- keyUp(now.Add(31*time.Microsecond), 'w')
 
-	awaitToggle(recorder)
+	recorder.ToggleBlocking()
 
 	assert.Equal(
 		t,
@@ -61,13 +61,4 @@ func runRecorder(recorder *Recorder) {
 			// Run without processing.
 		}
 	}()
-}
-
-func awaitToggle(recorder *Recorder) {
-	initialRecording := recorder.IsRecording
-	recorder.Toggle()
-
-	for recorder.IsRecording == initialRecording {
-		// Loop until "IsRecording" has changed.
-	}
 }
