@@ -13,13 +13,13 @@ var (
 	stopRecordIcon  = theme.MediaStopIcon()
 )
 
-func (g *GUI) createMacroRecordList() *fyne.Container {
+func (g *GUI) createMacroRecord() *fyne.Container {
 	macroList := widget.NewList(
 		func() int {
 			return len(g.recorder.RecordedMacros)
 		},
 		func() fyne.CanvasObject {
-			label := widget.NewLabel("")
+			label := newMacroLabel("")
 			button := widget.NewButtonWithIcon("", theme.MediaPlayIcon(), nil)
 			return container.NewBorder(
 				nil, nil,
@@ -27,12 +27,17 @@ func (g *GUI) createMacroRecordList() *fyne.Container {
 			)
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
+			macro := g.recorder.RecordedMacros[i]
 			item := o.(*fyne.Container)
 
-			label := item.Objects[0].(*widget.Label)
+			label := item.Objects[0].(*macroLabel)
+			label.OnDoubleTapped = func() {
+				details := newMacroDetails(macro, g.switchToMacroRecord)
+				g.mainWindow.SetContent(details.Container)
+			}
+
 			button := item.Objects[1].(*widget.Button)
 
-			macro := g.recorder.RecordedMacros[i]
 			label.SetText(macro.Name)
 			button.OnTapped = func() {
 				err := macro.PlayEvents()

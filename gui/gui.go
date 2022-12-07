@@ -3,7 +3,6 @@ package gui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
 	"magro"
 )
 
@@ -13,8 +12,8 @@ var fyneApp = app.New()
 var defaultWindowSize = fyne.NewSize(240, 360)
 
 type GUI struct {
-	mainWindow fyne.Window
-	appTabs    *container.AppTabs
+	mainWindow  fyne.Window
+	macroRecord *fyne.Container
 
 	recorder *magro.Recorder
 }
@@ -41,11 +40,11 @@ func (g *GUI) Close() {
 	fyneApp.Quit()
 }
 
+func (g *GUI) switchToMacroRecord() {
+	g.mainWindow.SetContent(g.macroRecord)
+}
+
 func (g *GUI) initWidgets() {
-	listTab := container.NewTabItem("list", g.createMacroRecordList())
-
-	g.appTabs = container.NewAppTabs(listTab)
-	g.appTabs.SetTabLocation(container.TabLocationBottom)
-
-	g.mainWindow.SetContent(g.appTabs)
+	g.macroRecord = g.createMacroRecord()
+	g.switchToMacroRecord()
 }
