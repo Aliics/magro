@@ -20,6 +20,8 @@ type Recorder struct {
 
 func NewRecorder(eventCh chan hook.Event) *Recorder {
 	return &Recorder{
+		RecordedMacros: []*Macro{},
+
 		recordCh:     make(chan bool),
 		eventCh:      eventCh,
 		processedCh:  make(chan hook.Event),
