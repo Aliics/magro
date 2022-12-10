@@ -2,9 +2,11 @@ package gui
 
 import (
 	"errors"
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"magro"
@@ -19,13 +21,15 @@ type macroDetails struct {
 	Container *fyne.Container
 
 	macro               *magro.Macro
+	parentWindow        fyne.Window
 	switchToMacroRecord func()
 	deleteMacro         func()
 }
 
-func newMacroDetails(macro *magro.Macro, switchToMacroRecord func(), deleteMacro func()) *macroDetails {
+func newMacroDetails(macro *magro.Macro, parentWindow fyne.Window, switchToMacroRecord func(), deleteMacro func()) *macroDetails {
 	m := &macroDetails{
 		macro:               macro,
+		parentWindow:        parentWindow,
 		switchToMacroRecord: switchToMacroRecord,
 		deleteMacro:         deleteMacro,
 	}
@@ -49,7 +53,7 @@ func (m *macroDetails) initContainer() {
 		return nil
 	}
 
-	deleteButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), m.deleteMacro)
+	deleteButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), m.showDeleteDialog)
 
 	topBorder := container.NewBorder(nil, nil, backButton, deleteButton, nameEntry)
 
@@ -70,4 +74,17 @@ func (m *macroDetails) initContainer() {
 		nil, nil, nil,
 		eventList,
 	)
+}
+
+func (m *macroDetails) showDeleteDialog() {
+	dialog.NewConfirm(
+		"delete",
+		fmt.Sprintf(`Delete "%s"?`, m.macro.Name),
+		func(shouldDelete bool) {
+			if shouldDelete {
+				m.deleteMacro()
+			}
+		},
+		m.parentWindow,
+	).Show()
 }

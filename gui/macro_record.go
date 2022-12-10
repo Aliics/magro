@@ -33,7 +33,7 @@ func (g *GUI) createMacroRecord() *fyne.Container {
 
 			label := item.Objects[0].(*macroLabel)
 			label.OnDoubleTapped = func() {
-				details := newMacroDetails(macro, g.switchToMacroRecord, func() {
+				details := newMacroDetails(macro, g.mainWindow, g.switchToMacroRecord, func() {
 					*g.recorder.RecordedMacros = slices.Delete(*g.recorder.RecordedMacros, i, i+1)
 					g.switchToMacroRecord()
 				})
