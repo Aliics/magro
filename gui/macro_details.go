@@ -26,7 +26,11 @@ type macroDetails struct {
 	deleteMacro         func()
 }
 
-func newMacroDetails(macro *magro.Macro, parentWindow fyne.Window, switchToMacroRecord func(), deleteMacro func()) *macroDetails {
+func newMacroDetails(
+	macro *magro.Macro,
+	parentWindow fyne.Window,
+	switchToMacroRecord, deleteMacro func(),
+) *macroDetails {
 	m := &macroDetails{
 		macro:               macro,
 		parentWindow:        parentWindow,
