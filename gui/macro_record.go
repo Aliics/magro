@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"golang.org/x/exp/slices"
 	"log"
 )
 
@@ -32,7 +33,10 @@ func (g *GUI) createMacroRecord() *fyne.Container {
 
 			label := item.Objects[0].(*macroLabel)
 			label.OnDoubleTapped = func() {
-				details := newMacroDetails(macro, g.switchToMacroRecord)
+				details := newMacroDetails(macro, g.switchToMacroRecord, func() {
+					*g.recorder.RecordedMacros = slices.Delete(*g.recorder.RecordedMacros, i, i+1)
+					g.switchToMacroRecord()
+				})
 				g.mainWindow.SetContent(details.Container)
 			}
 

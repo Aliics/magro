@@ -1,12 +1,18 @@
 package gui
 
 import (
+	"errors"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"magro"
+	"strings"
+)
+
+var (
+	errEmptyEntry = errors.New("text cannot be empty")
 )
 
 type macroDetails struct {
@@ -14,12 +20,14 @@ type macroDetails struct {
 
 	macro               *magro.Macro
 	switchToMacroRecord func()
+	deleteMacro         func()
 }
 
-func newMacroDetails(macro *magro.Macro, switchToMacroRecord func()) *macroDetails {
+func newMacroDetails(macro *magro.Macro, switchToMacroRecord func(), deleteMacro func()) *macroDetails {
 	m := &macroDetails{
 		macro:               macro,
 		switchToMacroRecord: switchToMacroRecord,
+		deleteMacro:         deleteMacro,
 	}
 
 	m.initContainer()
@@ -28,11 +36,22 @@ func newMacroDetails(macro *magro.Macro, switchToMacroRecord func()) *macroDetai
 }
 
 func (m *macroDetails) initContainer() {
-	backButton := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), func() {
-		m.switchToMacroRecord()
-	})
+	backButton := widget.NewButtonWithIcon("", theme.NavigateBackIcon(), m.switchToMacroRecord)
+
 	nameEntry := widget.NewEntryWithData(binding.BindString(&m.macro.Name))
-	topBorder := container.NewBorder(nil, nil, backButton, nil, nameEntry)
+	nameEntry.Validator = func(name string) error {
+		if strings.TrimSpace(name) == "" {
+			backButton.Disable()
+			return errEmptyEntry
+		}
+
+		backButton.Enable()
+		return nil
+	}
+
+	deleteButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), m.deleteMacro)
+
+	topBorder := container.NewBorder(nil, nil, backButton, deleteButton, nameEntry)
 
 	eventList := widget.NewList(
 		func() int {
