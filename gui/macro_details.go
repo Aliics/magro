@@ -66,10 +66,29 @@ func (m *macroDetails) initContainer() {
 			return len(m.macro.Events)
 		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("")
+			return container.NewBorder(
+				nil, nil,
+				container.NewHBox(
+					widget.NewLabel(""),
+					widget.NewLabel(""),
+				),
+				widget.NewButtonWithIcon("", theme.DocumentCreateIcon(), nil),
+			)
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*widget.Label).SetText(m.macro.Events[i].String())
+			event := m.macro.Events[i]
+			item := o.(*fyne.Container)
+
+			labelContainer := item.Objects[0].(*fyne.Container)
+
+			deltaLabel := labelContainer.Objects[0].(*widget.Label)
+			deltaLabel.SetText(fmt.Sprintf("%.3f", event.Delta.Seconds()))
+
+			keyLabel := labelContainer.Objects[1].(*widget.Label)
+			keyLabel.SetText(fmt.Sprintf("%s %c", event.KeyKind, event.Keycode))
+
+			editButton := item.Objects[1].(*widget.Button)
+			editButton.OnTapped = func() {}
 		},
 	)
 

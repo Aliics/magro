@@ -20,7 +20,7 @@ func (g *GUI) createMacroRecord() *fyne.Container {
 			return len(*g.recorder.RecordedMacros)
 		},
 		func() fyne.CanvasObject {
-			label := newMacroLabel("")
+			label := newTappableLabel("")
 			button := widget.NewButtonWithIcon("", theme.MediaPlayIcon(), nil)
 			return container.NewBorder(
 				nil, nil,
@@ -31,7 +31,7 @@ func (g *GUI) createMacroRecord() *fyne.Container {
 			macro := &(*g.recorder.RecordedMacros)[i]
 			item := o.(*fyne.Container)
 
-			label := item.Objects[0].(*macroLabel)
+			label := item.Objects[0].(*tappableLabel)
 			label.OnDoubleTapped = func() {
 				details := newMacroDetails(macro, g.mainWindow, g.switchToMacroRecord, func() {
 					*g.recorder.RecordedMacros = slices.Delete(*g.recorder.RecordedMacros, i, i+1)
