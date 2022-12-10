@@ -9,21 +9,18 @@ import (
 )
 
 func main() {
-	persister, err := persist.NewPersister()
+	// Macros slices for the Persister and Recorder to share.
+	var recordedMacros []magro.Macro
+
+	persister, err := createPersister(&recordedMacros)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer persister.Close()
 
-	err = persister.Load()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	recorder := createRecorder()
 	defer recorder.Close()
-
-	recorder.RecordedMacros = persister.RecordedMacros
+	recorder.RecordedMacros = &recordedMacros
 
 	mainGUI := gui.NewGUI(recorder)
 	defer mainGUI.Close()
@@ -40,6 +37,21 @@ func main() {
 	}()
 
 	mainGUI.ShowAndRun()
+}
+
+func createPersister(recordedMacros *[]magro.Macro) (*persist.Persister, error) {
+	persister, err := persist.NewPersister()
+	if err != nil {
+		return nil, err
+	}
+	persister.RecordedMacros = recordedMacros
+
+	err = persister.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	return persister, nil
 }
 
 func createRecorder() *magro.Recorder {

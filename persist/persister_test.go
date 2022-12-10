@@ -3,29 +3,27 @@ package persist
 import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
-	"magro"
 	"os"
 	"testing"
-	"time"
 )
 
 func TestPersister_Load(t *testing.T) {
 	// given
-	testPersistedData := Persisted{RecordedMacros: []*magro.Macro{{
+	testPersistedData := data{Macros: []macro{{
 		Name: "type name",
-		Events: []magro.Event{
-			{time.Microsecond, magro.KeyKindDown, 'a'},
-			{time.Microsecond, magro.KeyKindUp, 'a'},
-			{time.Microsecond, magro.KeyKindDown, 'l'},
-			{time.Microsecond, magro.KeyKindUp, 'l'},
-			{time.Microsecond, magro.KeyKindDown, 'e'},
-			{time.Microsecond, magro.KeyKindUp, 'e'},
-			{time.Microsecond, magro.KeyKindDown, 'x'},
-			{time.Microsecond, magro.KeyKindUp, 'x'},
+		Events: []event{
+			{0, 0, 'a'},
+			{0, 1, 'a'},
+			{0, 0, 'l'},
+			{0, 1, 'l'},
+			{0, 0, 'e'},
+			{0, 1, 'e'},
+			{0, 0, 'x'},
+			{0, 1, 'x'},
 		},
 	}}}
 
-	file, err := os.CreateTemp("", "persisted.json")
+	file, err := os.CreateTemp("", "data.json")
 	assert.NoError(t, err)
 
 	fileContents, err := json.Marshal(&testPersistedData)
@@ -41,11 +39,11 @@ func TestPersister_Load(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, testPersistedData.RecordedMacros, persister.RecordedMacros)
+	assert.Equal(t, testPersistedData, persistedFromMacroList(*persister.RecordedMacros))
 }
 
 func TestPersister_Start_updatesWhenMacrosChange(t *testing.T) {
-	file, err := os.CreateTemp("", "persisted.json")
+	file, err := os.CreateTemp("", "data.json")
 	assert.NoError(t, err)
 
 	persister, err := NewPersisterWithFile(file)
@@ -53,9 +51,9 @@ func TestPersister_Start_updatesWhenMacrosChange(t *testing.T) {
 
 	changeCh := persister.Start()
 
-	testMacro := &magro.Macro{Name: "cool testMacro"}
-	persister.RecordedMacros = append(persister.RecordedMacros, testMacro)
+	testData := data{[]macro{{Name: "cool testMacro"}}}
+	*persister.RecordedMacros = append(*persister.RecordedMacros, macroListFromPersisted(testData)...)
 
-	assert.Equal(t, Persisted{RecordedMacros: []*magro.Macro{testMacro}}, <-changeCh)
+	assert.Equal(t, testData, <-changeCh)
 	assert.Zero(t, len(changeCh))
 }

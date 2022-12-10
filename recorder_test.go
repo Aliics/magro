@@ -28,7 +28,7 @@ func TestRecorder_simpleKeyStrokes(t *testing.T) {
 
 	assert.Equal(
 		t,
-		[]*Macro{
+		&[]Macro{
 			{
 				Name: "new macro",
 				Events: []Event{

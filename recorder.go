@@ -8,19 +8,19 @@ import (
 
 type Recorder struct {
 	IsRecording    bool
-	RecordedMacros []*Macro
+	RecordedMacros *[]Macro
 
 	recordCh    chan bool
 	eventCh     chan hook.Event
 	processedCh chan hook.Event
 
 	previousEventTime *time.Time
-	currentMacro      *Macro
+	currentMacro      Macro
 }
 
 func NewRecorder(eventCh chan hook.Event) *Recorder {
 	return &Recorder{
-		RecordedMacros: []*Macro{},
+		RecordedMacros: &[]Macro{},
 
 		recordCh:     make(chan bool),
 		eventCh:      eventCh,
@@ -52,7 +52,7 @@ func (r *Recorder) Start() <-chan hook.Event {
 			select {
 			case nowRecording := <-r.recordCh:
 				if !nowRecording {
-					r.RecordedMacros = append(r.RecordedMacros, r.currentMacro)
+					*r.RecordedMacros = append(*r.RecordedMacros, r.currentMacro)
 					r.currentMacro = NewMacro()
 					r.previousEventTime = nil
 				} else {

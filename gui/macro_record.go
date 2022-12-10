@@ -16,7 +16,7 @@ var (
 func (g *GUI) createMacroRecord() *fyne.Container {
 	macroList := widget.NewList(
 		func() int {
-			return len(g.recorder.RecordedMacros)
+			return len(*g.recorder.RecordedMacros)
 		},
 		func() fyne.CanvasObject {
 			label := newMacroLabel("")
@@ -27,7 +27,7 @@ func (g *GUI) createMacroRecord() *fyne.Container {
 			)
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
-			macro := g.recorder.RecordedMacros[i]
+			macro := &(*g.recorder.RecordedMacros)[i]
 			item := o.(*fyne.Container)
 
 			label := item.Objects[0].(*macroLabel)

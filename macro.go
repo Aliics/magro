@@ -40,8 +40,8 @@ type Macro struct {
 	Events []Event
 }
 
-func NewMacro() *Macro {
-	return &Macro{Name: "new macro"}
+func NewMacro() Macro {
+	return Macro{Name: "new macro"}
 }
 
 func (m Macro) PlayEvents() error {
