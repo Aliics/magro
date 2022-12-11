@@ -9,7 +9,7 @@ import (
 // Initialize first to make sure fyne.App is ready.
 var fyneApp = app.New()
 
-var defaultWindowSize = fyne.NewSize(240, 360)
+var defaultWindowSize = fyne.NewSize(360, 480)
 
 type GUI struct {
 	mainWindow  fyne.Window

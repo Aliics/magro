@@ -1,13 +1,29 @@
 package magro
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-vgo/robotgo"
 	"log"
 	"time"
 )
 
+var (
+	errInvalidKeyKind = errors.New("unknown KeyKind")
+)
+
 type KeyKind uint8
+
+func NewKeyKindFromString(s string) (KeyKind, error) {
+	switch s {
+	case "Down":
+		return KeyKindDown, nil
+	case "Up":
+		return KeyKindUp, nil
+	default:
+		return 0, errInvalidKeyKind
+	}
+}
 
 func (k KeyKind) String() string {
 	switch k {
@@ -16,7 +32,7 @@ func (k KeyKind) String() string {
 	case KeyKindUp:
 		return "Up"
 	default:
-		panic("unknown KeyKind")
+		panic(errInvalidKeyKind)
 	}
 }
 
